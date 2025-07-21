@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 
 class MyShipmentsPage extends StatefulWidget {
@@ -79,7 +80,9 @@ class _MyShipmentsPageState extends State<MyShipmentsPage> {
           ? const Center(child: CircularProgressIndicator())
           : selectedShipment == null
           ? buildShipmentList()
-          : buildShipmentDetail(selectedShipment!),
+          : SingleChildScrollView(
+        child: ShipmentTicket(shipment: selectedShipment!),
+      ),
     );
   }
 
@@ -158,142 +161,156 @@ class _MyShipmentsPageState extends State<MyShipmentsPage> {
       ],
     );
   }
+}
 
-  Widget buildShipmentDetail(Map<String, dynamic> shipment) {
-    return Column(
-      children: [
-        Container(
-          height: 200,
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/images/world_map.jpg'),
-              fit: BoxFit.cover,
-              colorFilter: ColorFilter.mode(Colors.green, BlendMode.hue),
-            ),
-          ),
-          child: Center(
-            child: Icon(Icons.flight, size: 40, color: Colors.white),
-          ),
-        ),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.2),
-                    spreadRadius: 2,
-                    blurRadius: 5,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF92B61B).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Icon(shipment['icon'], color: const Color(0xFF92B61B)),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          shipment['from'],
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      const Icon(Icons.flight, color: const Color(0xFF92B61B)),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          shipment['to'],
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  _buildDetailRow('Sender:', shipment['shipperName']),
-                  _buildDetailRow('Recipient:', shipment['receiverName']),
-                  const SizedBox(height: 10),
-                  ...shipment['events'].map<Widget>((event) => _buildStatusRow(
-                    event['description'],
-                    '${event['date']} ${event['time']}',
-                  )),
-                  const SizedBox(height: 20),
-                  _buildDetailRow('Token:', 'BP#${DateTime.now().millisecondsSinceEpoch}'),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _buildDownloadButton('Download document', Icons.description),
-                      _buildDownloadButton('Download facture', Icons.receipt),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+// DashedLine widget for horizontal dashed separator
+class DashedLine extends StatelessWidget {
+  final double height;
+  final Color color;
 
-  Widget _buildDetailRow(String title, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        children: [
-          SizedBox(width: 80, child: Text(title, style: const TextStyle(fontWeight: FontWeight.w600))),
-          Expanded(child: Text(value, style: const TextStyle(fontSize: 14))),
-        ],
+  const DashedLine({this.height = 1, this.color = Colors.grey, Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: height,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final boxWidth = constraints.constrainWidth();
+          const dashWidth = 5.0;
+          const dashSpace = 3.0;
+          final dashCount = (boxWidth / (dashWidth + dashSpace)).floor();
+          return Flex(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            direction: Axis.horizontal,
+            children: List.generate(dashCount, (_) {
+              return SizedBox(
+                width: dashWidth,
+                height: height,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(color: color),
+                ),
+              );
+            }),
+          );
+        },
       ),
     );
   }
+}
 
-  Widget _buildStatusRow(String status, String date) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        children: [
-          const Icon(Icons.circle, size: 10, color: Color(0xFF92B61B)),
-          const SizedBox(width: 8),
-          Expanded(child: Text(status, style: const TextStyle(fontSize: 14))),
-          Text(date, style: const TextStyle(fontSize: 14, color: Colors.grey)),
-        ],
-      ),
-    );
+class ShipmentTicket extends StatelessWidget {
+  final Map<String, dynamic> shipment;
+
+  const ShipmentTicket({super.key, required this.shipment});
+
+  // Random 12-char alphanumeric tracking code generator
+  String generateTrackingCode() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    final rand = Random();
+    return List.generate(12, (index) => chars[rand.nextInt(chars.length)]).join();
   }
 
-  Widget _buildDownloadButton(String text, IconData icon) {
-    return Expanded(
+  @override
+  Widget build(BuildContext context) {
+    return Center(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        width: 300,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+        margin: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: const Color(0xFF92B61B).withOpacity(0.1),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: const Color(0xFF92B61B)),
-            const SizedBox(width: 8),
-            Text(text, style: const TextStyle(color: Color(0xFF92B61B))),
-            const SizedBox(width: 8),
-            const Icon(Icons.arrow_forward_ios, size: 16, color: Color(0xFF92B61B)),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.grey.shade300),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 2,
+              blurRadius: 6,
+              offset: const Offset(0, 3),
+            ),
           ],
         ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Chip(
+                  label: const Text("Standard Delivery"),
+                  backgroundColor: Colors.green.shade100,
+                ),
+                const Spacer(),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      shipment['from'],
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const Icon(Icons.local_shipping, size: 16),
+                    Text(
+                      shipment['to'],
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                )
+              ],
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              "Shipping Ticket",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            _ticketDetail("Sender", shipment['shipperName']),
+            _ticketDetail("Receiver", shipment['receiverName']),
+            _ticketDetail("From Date", shipment['fromDate']),
+            _ticketDetail("To Date", shipment['toDate']),
+            _ticketDetail("Weight", "${shipment['totalWeight']} Kg"),
+            const SizedBox(height: 20),
+
+            // Dashed line separator
+            const DashedLine(height: 1, color: Colors.grey),
+
+            const SizedBox(height: 20),
+
+            Container(
+              height: 50,
+              color: Colors.grey.shade300,
+              alignment: Alignment.center,
+              child: Text(
+                generateTrackingCode(),
+                style: const TextStyle(
+                  fontSize: 18,
+                  letterSpacing: 4,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Courier',
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Center(
+              child: Text(
+                "Tracking: 0000 ${shipment['shipperName'].hashCode.toString().substring(0, 4)} ${shipment['receiverName'].hashCode.toString().substring(0, 4)}",
+                style: const TextStyle(fontSize: 14),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _ticketDetail(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: const TextStyle(color: Colors.grey)),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
+        ],
       ),
     );
   }

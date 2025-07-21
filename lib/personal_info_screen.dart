@@ -19,13 +19,18 @@ class PersonalInfoScreen extends StatelessWidget {
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
-        leading: const Icon(Icons.arrow_back, color: Colors.white),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.help_outline, color: Colors.white),
             onPressed: () {
               Navigator.pop(context);
-              },
+            },
           ),
         ],
       ),
