@@ -9,9 +9,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:flutter/material.dart';
 import 'personal_info_screen.dart';
 import 'my_shipments_page.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 void main() {
   runApp(const MyApp());

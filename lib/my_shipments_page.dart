@@ -28,10 +28,17 @@ class _MyShipmentsPageState extends State<MyShipmentsPage> {
           'to': 'Marrakech',
           'fromDate': '17/07/2025',
           'toDate': '17/07/2025',
-          'icon': Icons.local_shipping,
+          // National shipment
+          'icon': Icons.location_on,
+
           'direction': Icons.arrow_downward,
           'shipperName': 'Ayoub ELKEBBAR',
+          'shipperPhone': '06xxxx8456',
+          'shipperCity': 'Casablanca',
           'receiverName': 'Amine IRAQI',
+          'receiverPhone': '07xxxx6538',
+          'receiverCity': 'Marrakech',
+          'company': 'Boxpid Logistics',
           'totalWeight': '2',
           'events': [
             {'description': 'Order created', 'date': '17/07/2025', 'time': '14:30'}
@@ -42,10 +49,17 @@ class _MyShipmentsPageState extends State<MyShipmentsPage> {
           'to': 'Tanger',
           'fromDate': '15/07/2025',
           'toDate': '15/07/2025',
-          'icon': Icons.mail,
+          // International shipment
+          'icon': Icons.public,
+
           'direction': Icons.arrow_upward,
           'shipperName': 'Radia Omalek',
+          'shipperPhone': '06xxxx1234',
+          'shipperCity': 'Fes',
           'receiverName': 'Hamza El Mersly',
+          'receiverPhone': '07xxxx4321',
+          'receiverCity': 'Tanger',
+          'company': 'Boxpid Express',
           'totalWeight': '5',
           'events': [
             {'description': 'Shipped', 'date': '15/07/2025', 'time': '12:00'}
@@ -59,6 +73,7 @@ class _MyShipmentsPageState extends State<MyShipmentsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(selectedShipment == null ? "My shipments" : "Track shipment"),
         leading: selectedShipment != null
@@ -163,7 +178,6 @@ class _MyShipmentsPageState extends State<MyShipmentsPage> {
   }
 }
 
-// DashedLine widget for horizontal dashed separator
 class DashedLine extends StatelessWidget {
   final double height;
   final Color color;
@@ -204,7 +218,6 @@ class ShipmentTicket extends StatelessWidget {
 
   const ShipmentTicket({super.key, required this.shipment});
 
-  // Random 12-char alphanumeric tracking code generator
   String generateTrackingCode() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     final rand = Random();
@@ -213,32 +226,64 @@ class ShipmentTicket extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final trackingCode = generateTrackingCode();
+
     return Center(
-      child: Container(
-        width: 300,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-        margin: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.grey.shade300),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              spreadRadius: 2,
-              blurRadius: 6,
-              offset: const Offset(0, 3),
+      child: Column(
+        children: [
+          ClipPath(
+            clipper: DolDurmaClipper(right: 40, holeRadius: 20),
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFF91B51B),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(24),
+                  topRight: Radius.circular(24),
+                ),
+              ),
+              width: 300,
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 25),
+              child: Center(
+                child: Text(
+                  trackingCode,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    letterSpacing: 4,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Courier',
+                    color: Colors.white,
+                  ),
+                ),
+              ),
             ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+          ),
+
+          /// 📦 WHITE SHIPPING TICKET
+          Container(
+            width: 300,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(24),
+                bottomRight: Radius.circular(24),
+              ),
+              border: Border.all(color: Colors.grey.shade300),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.2),
+                  spreadRadius: 2,
+                  blurRadius: 6,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Row(
               children: [
                 Chip(
                   label: const Text("Standard Delivery"),
-                  backgroundColor: Colors.green.shade100,
+                  backgroundColor: const Color(0xFFC7D8C6),
+
                 ),
                 const Spacer(),
                 Column(
@@ -257,52 +302,95 @@ class ShipmentTicket extends StatelessWidget {
                 )
               ],
             ),
-            const SizedBox(height: 20),
-            const Text(
-              "Shipping Ticket",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+
+
+          const SizedBox(height: 16),
+          Container(
+            width: 320,
+            padding: const EdgeInsets.only(top: 16, bottom: 16),  // no side padding
+            margin: const EdgeInsets.fromLTRB(8, 0, 8, 30),         // light side margin + bottom margin
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.white),
             ),
-            const SizedBox(height: 16),
-            _ticketDetail("Sender", shipment['shipperName']),
-            _ticketDetail("Receiver", shipment['receiverName']),
-            _ticketDetail("From Date", shipment['fromDate']),
-            _ticketDetail("To Date", shipment['toDate']),
-            _ticketDetail("Weight", "${shipment['totalWeight']} Kg"),
-            const SizedBox(height: 20),
-
-            // Dashed line separator
-            const DashedLine(height: 1, color: Colors.grey),
-
-            const SizedBox(height: 20),
-
-            Container(
-              height: 50,
-              color: Colors.grey.shade300,
-              alignment: Alignment.center,
-              child: Text(
-                generateTrackingCode(),
-                style: const TextStyle(
-                  fontSize: 18,
-                  letterSpacing: 4,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Courier',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: const [
+                    Text("Sender", style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text("Receiver", style: TextStyle(fontWeight: FontWeight.bold)),
+                  ],
                 ),
-              ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(shipment['shipperName']),
+                    Text(shipment['receiverName']),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(shipment['shipperPhone']),
+                    Text(shipment['receiverPhone']),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(shipment['shipperCity']),
+                    Text(shipment['receiverCity']),
+                  ],
+                ),
+                const Divider(thickness: 1),
+                const SizedBox(height: 10),
+                const Text("Pickup & Delivery", style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: const [
+                    Text("Pickup", style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text("Delivery", style: TextStyle(fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(shipment['fromDate']),
+                    Text(shipment['toDate']),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(shipment['events'][0]['time']), // assuming time is the same for pickup/delivery
+                    Text(shipment['events'][0]['time']),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                const Divider(thickness: 1),
+                const SizedBox(height: 10),
+                const Text("Package Details", style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                _infoRow("Dimensions", "16x16x4"), // hardcoded for now
+                _infoRow("Weight", "${shipment['totalWeight']} Kg"),
+                _infoRow("Description", "Lorem ipsum dolor sit amet."),
+
+              ],
             ),
-            const SizedBox(height: 10),
-            Center(
-              child: Text(
-                "Tracking: 0000 ${shipment['shipperName'].hashCode.toString().substring(0, 4)} ${shipment['receiverName'].hashCode.toString().substring(0, 4)}",
-                style: const TextStyle(fontSize: 14),
-              ),
-            )
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _ticketDetail(String label, String value) {
+  Widget _infoRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
@@ -314,4 +402,39 @@ class ShipmentTicket extends StatelessWidget {
       ),
     );
   }
+}
+
+
+class DolDurmaClipper extends CustomClipper<Path> {
+  DolDurmaClipper({required this.right, required this.holeRadius});
+
+  final double right;
+  final double holeRadius;
+
+  @override
+  Path getClip(Size size) {
+    final path = Path()
+      ..moveTo(0, 0)
+      ..lineTo(size.width - right - holeRadius, 0.0)
+      ..arcToPoint(
+        Offset(size.width - right, 0),
+        clockwise: false,
+        radius: const Radius.circular(1),
+      )
+      ..lineTo(size.width, 0.0)
+      ..lineTo(size.width, size.height)
+      ..lineTo(size.width - right, size.height)
+      ..arcToPoint(
+        Offset(size.width - right - holeRadius, size.height),
+        clockwise: false,
+        radius: const Radius.circular(1),
+      )
+      ..lineTo(0.0, size.height)
+      ..close();
+
+    return path;
+  }
+
+  @override
+  bool shouldReclip(DolDurmaClipper oldClipper) => true;
 }
